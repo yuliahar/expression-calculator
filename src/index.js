@@ -26,9 +26,6 @@ function eval(result) {
                 temp.splice(temp.length - 2, 2, value);
                 break;
             case '/':
-                if (temp[1] === 0) {
-                    throw Error("TypeError: Division by zero.");
-                }
                 value = top(temp, 2) / top(temp);
                 temp.splice(temp.length - 2, 2, value);
                 break;
@@ -43,6 +40,9 @@ function expressionCalculator(expr) {
     let result = Array();
     let operations = Array();
     let last_bracket_flag = 0;
+    if (expr.indexOf('/ 0') >= 0) {
+        throw Error("TypeError: Division by zero.");
+    }
     expr = expr.match(/(\d+|[+\/\-*()])/g);
     expr.forEach(elem => {
         if (!(elem in OPERATIONS) && elem !== '(' && elem !== ')') {
@@ -51,10 +51,8 @@ function expressionCalculator(expr) {
             operations.push(elem);
             last_bracket_flag = result.length;
         } else if (elem === ')') {
-            let array = result.splice(last_bracket_flag, result.length - last_bracket_flag);
             let temp = operations.splice(operations.lastIndexOf('(') + 1, operations.length - operations.lastIndexOf('(') - 1);
-            array = array.concat(temp.reverse());
-            result.push(eval(array));
+            result = result.concat(temp.reverse());
             if (operations.length === 0) {
                 throw Error("ExpressionError: Brackets must be paired");
             }
